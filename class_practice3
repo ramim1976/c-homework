@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <math.h>
+
+// Display menu and return user choice
+int menu(void) {
+    int n;
+    printf("1. Factorial\n");
+    printf("2. Sine\n");
+    printf("3. Log (base 10)\n");
+    printf("4. Square root\n");
+    printf("5. Permutation (nPr)\n");
+    printf("6. Combination (nCr)\n");
+    printf("7. End\n");
+    printf("Please select: ");
+    scanf("%d", &n);  // Corrected scanf syntax
+    return n;
+}
+
+// Function to compute factorial
+void factorial() {
+    int n;
+    printf("Enter a non-negative integer: ");
+    scanf("%d", &n);
+    if (n < 0) {
+        printf("Factorial not defined for negative numbers.\n");
+        return;
+    }
+    int result = 1;
+    for (int i = 2; i <= n; i++) {
+        result *= i;
+    }
+    printf("Factorial of %d is %d\n", n, result);
+}
+
+// Function to compute sine
+void sine() {
+    double x;
+    printf("Enter angle in degrees: ");
+    scanf("%lf", &x);
+    double radians = x * M_PI / 180.0;
+    printf("Sine(%lf degrees) = %lf\n", x, sin(radians));
+}
+
+// Function to compute log base 10
+void logBase10() {
+    double x;
+    printf("Enter a positive number: ");
+    scanf("%lf", &x);
+    if (x <= 0) {
+        printf("Logarithm not defined for non-positive numbers.\n");
+        return;
+    }
+    printf("Log base 10 of %lf is %lf\n", x, log10(x));
+}
+
+int main(void) {
+    while (1) {
+        switch (menu()) {  // Corrected call to menu()
+            case 1:
+                factorial();
+                break;
+            case 2:
+                sine();
+                break;
+            case 3:
+                logBase10();
+                break;
+            case 7:
+                printf("Quitting.\n");
+                return 0;
+            default:
+                printf("Bad choice.\n");
+                break;
+        }
+    }
+}
