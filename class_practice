@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+// Function to get an integer from the user
+int get_integer() {
+    int value;
+    printf("Enter an integer: ");
+    scanf("%d", &value);
+    return value;
+}
+
+// Function to add two integers
+int add(int x, int y) {
+    return x + y;
+}
+
+int main(void) {
+    int x = get_integer();
+    int y = get_integer();
+
+    int sum = add(x, y);
+    printf("The sum of the two numbers is %d.\n", sum);  // Corrected newline
+    return 0;
+}
