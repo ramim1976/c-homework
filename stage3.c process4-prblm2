@@ -1,0 +1,258 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+
+// Struct to store Hangul character, English alphabet, and pronunciation
+typedef struct {
+    char hangul[3];  // Hangul character (1 byte + null terminator)
+    char english[2]; // English alphabet (1 byte + null terminator)
+    char pronunciation[20]; // English pronunciation
+} HangulChar;
+
+// Struct to store flashcard game results
+typedef struct {
+    char name[50];
+    char challengeType[3]; // KE or EK
+    int totalScore;
+    int attemptCount;
+} FlashcardResult;
+
+// Global variables for Hangul consonants and vowels
+HangulChar hangulConsonants[] = {
+    {"ㄱ", "g", "giyeok"},
+    {"ㄴ", "n", "nieun"},
+    {"ㄷ", "d", "digeut"},
+    {"ㄹ", "r", "rieul"},
+    {"ㅁ", "m", "mieum"},
+    {"ㅂ", "b", "bieup"},
+    {"ㅅ", "s", "siot"},
+    {"ㅇ", "ng", "ieung"},
+    {"ㅈ", "j", "jieut"},
+    {"ㅊ", "ch", "chieut"},
+    {"ㅋ", "k", "kieuk"},
+    {"ㅌ", "t", "tieut"},
+    {"ㅍ", "p", "pieup"},
+    {"ㅎ", "h", "hieut"}
+};
+
+HangulChar hangulVowels[] = {
+    {"ㅏ", "a", "a"},
+    {"ㅑ", "ya", "ya"},
+    {"ㅓ", "eo", "eo"},
+    {"ㅕ", "yeo", "yeo"},
+    {"ㅗ", "o", "o"},
+    {"ㅛ", "yo", "yo"},
+    {"ㅜ", "u", "u"},
+    {"ㅠ", "yu", "yu"},
+    {"ㅡ", "eu", "eu"},
+    {"ㅣ", "i", "i"}
+};
+
+#define NUM_CONSONANTS 14
+#define NUM_VOWELS 10
+#define MAX_ATTEMPTS 3
+#define NUM_QUESTIONS 5
+
+// Array to store flashcard results
+FlashcardResult results[100];
+int resultCount = 0; // to keep track of the number of results
+
+// Function to shuffle Hangul characters
+void shuffleArray(HangulChar arr[], int n) {
+    srand(time(NULL));
+    for (int i = 0; i < n; i++) {
+        int j = rand() % n;
+        HangulChar temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+}
+
+// Function to ask questions and check answers
+int isAnswer(char *answer, HangulChar *question) {
+    return (strcmp(answer, question->english) == 0 || strcmp(answer, question->pronunciation) == 0);
+}
+
+// Function to randomly select Hangul characters for consonants or vowels
+void selectRandomTakers(char *name) {
+    printf("Welcome, %s, to the Hangul quiz session!\n", name);
+}
+
+// Function for Hangul to English game (KE)
+void playKor2EngGame(char *name, int isConsonant) {
+    int score = 0;
+    int answeredQuestions[NUM_QUESTIONS] = {0};
+    int attemptCount = 0;
+
+    // Select appropriate set of Hangul characters (consonants or vowels)
+    HangulChar *selectedChars;
+    int numChars;
+    if (isConsonant) {
+        selectedChars = hangulConsonants;
+        numChars = NUM_CONSONANTS;
+    } else {
+        selectedChars = hangulVowels;
+        numChars = NUM_VOWELS;
+    }
+
+    shuffleArray(selectedChars, numChars);
+    printf("\nChallenge: Hangul to English (KE)\n");
+
+    // Randomly select 5 unique Hangul questions
+    for (int i = 0; i < NUM_QUESTIONS; i++) {
+        int idx = rand() % numChars;
+        if (!answeredQuestions[idx]) {
+            answeredQuestions[idx] = 1;
+            HangulChar *question = &selectedChars[idx];
+
+            printf("Question %d: What is the English equivalent of %s?\n", i + 1, question->hangul);
+            char answer[20];
+            printf("Answer (English letter or pronunciation): ");
+            scanf("%s", answer);
+
+            if (isAnswer(answer, question)) {
+                printf("Correct!\n");
+                score += 10;
+            } else {
+                printf("Incorrect. The correct answer was: %s or %s.\n", question->english, question->pronunciation);
+            }
+        }
+    }
+
+    // Store results
+    FlashcardResult result;
+    strcpy(result.name, name);
+    strcpy(result.challengeType, "KE");
+    result.totalScore = score;
+    result.attemptCount = ++attemptCount;
+    results[resultCount++] = result;
+
+    printf("Your total score is %d\n", score);
+}
+
+// Function for English to Hangul game (EK)
+void playEng2KorGame(char *name, int isConsonant) {
+    int score = 0;
+    int answeredQuestions[NUM_QUESTIONS] = {0};
+    int attemptCount = 0;
+
+    // Select appropriate set of Hangul characters (consonants or vowels)
+    HangulChar *selectedChars;
+    int numChars;
+    if (isConsonant) {
+        selectedChars = hangulConsonants;
+        numChars = NUM_CONSONANTS;
+    } else {
+        selectedChars = hangulVowels;
+        numChars = NUM_VOWELS;
+    }
+
+    shuffleArray(selectedChars, numChars);
+    printf("\nChallenge: English to Hangul (EK)\n");
+
+    // Randomly select 5 unique English alphabet questions
+    for (int i = 0; i < NUM_QUESTIONS; i++) {
+        int idx = rand() % numChars;
+        if (!answeredQuestions[idx]) {
+            answeredQuestions[idx] = 1;
+            HangulChar *question = &selectedChars[idx];
+
+            printf("Question %d: What is the Hangul equivalent of the English letter %s?\n", i + 1, question->english);
+            char answer[3];
+            printf("Answer (Hangul character): ");
+            scanf("%s", answer);
+
+            if (strcmp(answer, question->hangul) == 0) {
+                printf("Correct!\n");
+                score += 10;
+            } else {
+                printf("Incorrect. The correct answer was: %s.\n", question->hangul);
+            }
+        }
+    }
+
+    // Store results
+    FlashcardResult result;
+    strcpy(result.name, name);
+    strcpy(result.challengeType, "EK");
+    result.totalScore = score;
+    result.attemptCount = ++attemptCount;
+    results[resultCount++] = result;
+
+    printf("Your total score is %d\n", score);
+}
+
+// Function to display results
+void showResult() {
+    if (resultCount == 0) {
+        printf("No results available.\n");
+        return;
+    }
+
+    // Sorting results by total score
+    for (int i = 0; i < resultCount - 1; i++) {
+        for (int j = i + 1; j < resultCount; j++) {
+            if (results[i].totalScore < results[j].totalScore) {
+                FlashcardResult temp = results[i];
+                results[i] = results[j];
+                results[j] = temp;
+            }
+        }
+    }
+
+    // Display results
+    printf("\n--- Results ---\n");
+    for (int i = 0; i < resultCount; i++) {
+        printf("Name: %s, Challenge Type: %s, Score: %d, Attempt Count: %d\n",
+               results[i].name, results[i].challengeType, results[i].totalScore, results[i].attemptCount);
+    }
+}
+
+// Main function
+int main() {
+    char name[50];
+    int choice, subChoice;
+
+    printf("Enter your name: ");
+    scanf("%s", name);
+
+    do {
+        printf("\n--- Hangul Learning Menu ---\n");
+        printf("1. Hangul to English\n");
+        printf("2. English to Hangul\n");
+        printf("3. View Results\n");
+        printf("0. Exit\n");
+        printf("Choose an option: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Select learning type:\n");
+                printf("1. Consonants\n");
+                printf("2. Vowels\n");
+                printf("Choose an option: ");
+                scanf("%d", &subChoice);
+                playKor2EngGame(name, subChoice == 1);
+                break;
+            case 2:
+                printf("Select learning type:\n");
+                printf("1. Consonants\n");
+                printf("2. Vowels\n");
+                printf("Choose an option: ");
+                scanf("%d", &subChoice);
+                playEng2KorGame(name, subChoice == 1);
+                break;
+            case 3:
+                showResult();
+                break;
+            case 0:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid option! Try again.\n");
+        }
+    } while (choice != 0);
+
+    return 0;
+}
