@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+
+typedef struct {
+    char keyword[10];
+    char message[300];
+} ArthurTrauma;
+
+ArthurTrauma arthur = {
+    "specter",
+    "I confess. After graduating from university, I was blinded by the arrogance of starting a startup and recklessly blocked my friends' paths. I painfully learned that when I am the only one convinced by my idea, it leads to disastrous results. The past Arthur was a ghost of dogmatism and stubbornness."
+};
+
+void charToBinary(unsigned char ch, char *binary) {
+    for (int i = 7; i >= 0; i--) {
+        binary[7 - i] = (ch & (1 << i)) ? '' : '0';
+    }
+    binary[8] = '\0';
+}
+
+int isRightChar(char userInput, char originalChar) {
+    return userInput == originalChar;
+}
+
+int isEasterEgg(char *input) {
+    return strcmp(input, arthur.keyword) == 0;
+}
+
+void find_easter_egg() {
+    char reversedBinary[7][9];
+    printf("<<Arthur's Easter Egg>>\n");
+
+    // Convert and reverse the binary order
+    for (int i = 0; i < 7; i++) {
+        charToBinary(arthur.keyword[i], reversedBinary[6 - i]);
+    }
+
+    printf("Binary values (reversed):\n");
+    for (int i = 0; i < 7; i++) {
+        printf("%s ", reversedBinary[i]);
+    }
+    printf("\n");
+
+    // Prompt user to enter characters
+    char userChars[8];
+    for (int i = 0; i < 7; i++) {
+        char binary[9];
+        strcpy(binary, reversedBinary[i]);
+
+        // Convert binary back to character
+        int val = 0;
+        for (int j = 0; j < 8; j++) {
+            val = (val << 1) | (binary[j] - '0');
+        }
+
+        char expectedChar = (char)val;
+        char inputChar;
+        printf("Enter character for binary %s: ", binary);
+        scanf(" %c", &inputChar);
+
+        while (!isRightChar(inputChar, expectedChar)) {
+            printf("Incorrect. Try again: ");
+            scanf(" %c", &inputChar);
+        }
+
+        userChars[i] = inputChar;
+    }
+    userChars[7] = '\0';
+
+    printf("Combine the characters into a word: ");
+    char finalWord[20];
+    scanf("%s", finalWord);
+
+    if (isEasterEgg(finalWord)) {
+        printf("##Easter Egg Discovered!$$\n%s\n", arthur.message);
+    } else {
+        printf("Incorrect keyword. Returning to menu.\n");
+    }
+}
+
+// BONUS: Shuffle, reverse, convert to binary with odd-even split
+void bonus_shuffle_and_convert() {
+    char shuffled[8];
+    strcpy(shuffled, arthur.keyword);
+    int len = strlen(shuffled);
+
+    // Shuffle letters randomly
+    srand(time(NULL));
+    for (int i = 0; i < len - 1; i++) {
+        int j = i + rand() % (len - i);
+        char tmp = shuffled[i];
+        shuffled[i] = shuffled[j];
+        shuffled[j] = tmp;
+    }
+
+    printf("\nBONUS - Shuffled keyword: %s\n", shuffled);
+
+    // Reverse
+    char reversed[8];
+    for (int i = 0; i < len; i++) {
+        reversed[i] = shuffled[len - 1 - i];
+    }
+    reversed[len] = '\0';
+
+    printf("Reversed: %s\n", reversed);
+
+    // Odd indices first, then even
+    char reordered[8];
+    int idx = 0;
+    for (int i = 1; i < len; i += 2) {
+        reordered[idx++] = reversed[i];
+    }
+    for (int i = 0; i < len; i += 2) {
+        reordered[idx++] = reversed[i];
+    }
+    reordered[len] = '\0';
+
+    printf("Reordered (odd-indexed then even-indexed): %s\n", reordered);
+    printf("Binary of reordered:\n");
+
+    char binary[9];
+    for (int i = 0; i < len; i++) {
+        charToBinary(reordered[i], binary);
+        printf("%s ", binary);
+    }
+    printf("\n");
+}
+
+void selfManagementMenu() {
+    char input[20];
+    while (1) {
+        printf("\n[II. Training > 2. Self-Management and Teamwork]\n");
+        printf("Enter a name (or type 'back' to return): ");
+        scanf("%s", input);
+
+        if (strcmp(input, "Arthur") == 0) {
+            find_easter_egg();
+        } else if (strcmp(input, "bonus") == 0) {
+            bonus_shuffle_and_convert();
+        } else if (strcmp(input, "back") == 0) {
+            return;
+        } else {
+            printf("No such option. Try 'Arthur' to trigger the Easter egg.\n");
+        }
+    }
+}
+
+int main() {
+    selfManagementMenu();
+    return 0;
+}
