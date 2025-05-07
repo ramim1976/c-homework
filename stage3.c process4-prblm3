@@ -1,0 +1,226 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define MAX_QUESTIONS 10
+#define MAX_ATTEMPTS 3
+#define MAX_NICKNAME_LENGTH 20
+#define MAX_WORDS_IN_SENTENCE 10
+#define MAX_LEARNERS 10
+
+// Struct for English and Korean sentence pair
+typedef struct {
+    char englishSentence[100];
+    char koreanSentence[100];
+} EngKorSentence;
+
+// Struct to store grammar scores
+typedef struct {
+    char nickname[MAX_NICKNAME_LENGTH];
+    int totalScore;
+} GrammarScore;
+
+// Struct to store learner results
+typedef struct {
+    char nickname[MAX_NICKNAME_LENGTH];
+    int challengeType;
+    int totalScore;
+    int attemptCount;
+} GrammarResult;
+
+// Global arrays to store sentences and learners
+EngKorSentence sentenceBank[MAX_QUESTIONS];
+GrammarScore grammarScores[MAX_LEARNERS];
+GrammarResult grammarResults[MAX_LEARNERS];
+int totalLearners = 0;
+
+// Function prototypes
+void initializeSentences();
+void shuffleWords(char sentence[], char shuffledWords[][MAX_WORDS_IN_SENTENCE]);
+void learnKoreanGrammar();
+void composeSentences();
+void printScore();
+int checkNickname(char nickname[]);
+void quickSort(char arr[][MAX_WORDS_IN_SENTENCE], int low, int high);
+int partition(char arr[][MAX_WORDS_IN_SENTENCE], int low, int high);
+
+// Main function
+int main() {
+    srand(time(0)); // Seed for random number generation
+    initializeSentences(); // Initialize sentence data
+
+    // Main menu loop
+    while (1) {
+        learnKoreanGrammar();
+    }
+
+    return 0;
+}
+
+// Function to initialize sentence bank with English and Korean sentence pairs
+void initializeSentences() {
+    // English sentence and corresponding Korean sentence pairs
+    strcpy(sentenceBank[0].englishSentence, "I am a student.");
+    strcpy(sentenceBank[0].koreanSentence, "나는 학생입니다.");
+    strcpy(sentenceBank[1].englishSentence, "She likes music.");
+    strcpy(sentenceBank[1].koreanSentence, "그녀는 음악을 좋아합니다.");
+    strcpy(sentenceBank[2].englishSentence, "He is eating breakfast.");
+    strcpy(sentenceBank[2].koreanSentence, "그는 아침을 먹고 있습니다.");
+    strcpy(sentenceBank[3].englishSentence, "They are playing soccer.");
+    strcpy(sentenceBank[3].koreanSentence, "그들은 축구를 하고 있습니다.");
+    strcpy(sentenceBank[4].englishSentence, "I will go to the market.");
+    strcpy(sentenceBank[4].koreanSentence, "나는 시장에 갈 것입니다.");
+    strcpy(sentenceBank[5].englishSentence, "She is reading a book.");
+    strcpy(sentenceBank[5].koreanSentence, "그녀는 책을 읽고 있습니다.");
+    strcpy(sentenceBank[6].englishSentence, "We are studying.");
+    strcpy(sentenceBank[6].koreanSentence, "우리는 공부하고 있습니다.");
+    strcpy(sentenceBank[7].englishSentence, "He is cooking dinner.");
+    strcpy(sentenceBank[7].koreanSentence, "그는 저녁을 요리하고 있습니다.");
+    strcpy(sentenceBank[8].englishSentence, "They are watching TV.");
+    strcpy(sentenceBank[8].koreanSentence, "그들은 TV를 보고 있습니다.");
+    strcpy(sentenceBank[9].englishSentence, "She is writing a letter.");
+    strcpy(sentenceBank[9].koreanSentence, "그녀는 편지를 쓰고 있습니다.");
+}
+
+// Function to shuffle words in a sentence
+void shuffleWords(char sentence[], char shuffledWords[][MAX_WORDS_IN_SENTENCE]) {
+    char *word = strtok(sentence, " ");
+    int wordCount = 0;
+    
+    // Split sentence into words
+    while (word != NULL) {
+        strcpy(shuffledWords[wordCount], word);
+        wordCount++;
+        word = strtok(NULL, " ");
+    }
+
+    // Shuffle words using Quick Sort
+    quickSort(shuffledWords, 0, wordCount - 1);
+}
+
+// Function to perform QuickSort for shuffling words
+void quickSort(char arr[][MAX_WORDS_IN_SENTENCE], int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+// Partition function for QuickSort
+int partition(char arr[][MAX_WORDS_IN_SENTENCE], int low, int high) {
+    char pivot[MAX_WORDS_IN_SENTENCE];
+    strcpy(pivot, arr[high]);
+    int i = low - 1;
+    
+    for (int j = low; j <= high - 1; j++) {
+        if (strcmp(arr[j], pivot) < 0) {
+            i++;
+            char temp[MAX_WORDS_IN_SENTENCE];
+            strcpy(temp, arr[i]);
+            strcpy(arr[i], arr[j]);
+            strcpy(arr[j], temp);
+        }
+    }
+    
+    char temp[MAX_WORDS_IN_SENTENCE];
+    strcpy(temp, arr[i + 1]);
+    strcpy(arr[i + 1], arr[high]);
+    strcpy(arr[high], temp);
+    
+    return i + 1;
+}
+
+// Function to check if a nickname exists
+int checkNickname(char nickname[]) {
+    for (int i = 0; i < totalLearners; i++) {
+        if (strcmp(grammarScores[i].nickname, nickname) == 0) {
+            return 1; // Nickname found
+        }
+    }
+    return 0; // Nickname not found
+}
+
+// Function to prompt the learner to choose an option in grammar learning
+void learnKoreanGrammar() {
+    char nickname[MAX_NICKNAME_LENGTH];
+    int attempts = 0;
+
+    printf("Enter your nickname: ");
+    scanf("%s", nickname);
+
+    // Check if the nickname exists
+    while (attempts < MAX_ATTEMPTS && !checkNickname(nickname)) {
+        printf("Nickname not found. Try again: ");
+        scanf("%s", nickname);
+        attempts++;
+    }
+
+    if (attempts == MAX_ATTEMPTS) {
+        printf("Nickname not found after 3 attempts. Exiting...\n");
+        return;
+    }
+
+    int choice;
+    printf("1. Compose Korean Sentences\n");
+    printf("2. Check Scores\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        composeSentences();
+    } else if (choice == 2) {
+        printScore();
+    }
+}
+
+// Function to compose Korean sentences
+void composeSentences() {
+    int score = 0;
+
+    for (int i = 0; i < 5; i++) {
+        int randomIndex = rand() % MAX_QUESTIONS;
+        char shuffledWords[MAX_WORDS_IN_SENTENCE][MAX_WORDS_IN_SENTENCE];
+        
+        printf("English Sentence: %s\n", sentenceBank[randomIndex].englishSentence);
+        shuffleWords(sentenceBank[randomIndex].koreanSentence, shuffledWords);
+        
+        printf("Shuffled Korean words: ");
+        for (int j = 0; j < MAX_WORDS_IN_SENTENCE; j++) {
+            if (strlen(shuffledWords[j]) > 0) {
+                printf("%s ", shuffledWords[j]);
+            }
+        }
+        printf("\n");
+        
+        // Let the learner rearrange words to form the correct sentence
+        char answer[MAX_WORDS_IN_SENTENCE * 10];
+        printf("Rearrange the words to form a correct Korean sentence: ");
+        getchar();  // To consume any newline character from previous input
+        fgets(answer, sizeof(answer), stdin);
+        answer[strcspn(answer, "\n")] = '\0';  // Remove newline character
+        
+        if (strcmp(answer, sentenceBank[randomIndex].koreanSentence) == 0) {
+            score += 20; // Correct answer
+        }
+    }
+
+    printf("You scored: %d\n", score);
+    printf("Total score: %d\n", score);
+
+    // Update learner's total score in the result array
+    for (int i = 0; i < totalLearners; i++) {
+        if (strcmp(grammarScores[i].nickname, "learner_nickname") == 0) {
+            grammarScores[i].totalScore = score;
+        }
+    }
+}
+
+// Function to print scores
+void printScore() {
+    printf("Printing learner scores:\n");
+    for (int i = 0; i < totalLearners; i++) {
+        printf("%s: %d\n", grammarScores[i].nickname, grammarScores[i].totalScore);
+    }
+}
